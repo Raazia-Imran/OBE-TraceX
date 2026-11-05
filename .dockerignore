@@ -1,0 +1,8 @@
+.git
+.venv
+.env
+*.sqlite3
+*.xlsx
+private-data
+private-samples
+__pycache__

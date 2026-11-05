@@ -14,6 +14,7 @@ OBE-TraceX means Outcome-Based Education Tracking, Analysis, and Execution. This
 - [Full development plan](docs/DEVELOPMENT_PLAN.md)
 - [Baseline inspection and known differences](docs/BASELINE_REVIEW.md)
 - [Testing and acceptance](docs/ACCEPTANCE.md)
+- [Verification record and limits](docs/VERIFICATION.md)
 - [NED server deployment and recovery](docs/DEPLOYMENT.md)
 - [n8n and Google integration](integrations/README.md)
 - [Preserved artifact hashes](docs/baseline-manifest.json)

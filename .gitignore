@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+*.sqlite3
+*.sqlite3-*
+staticfiles/
+private-samples/
+private-data/
+credentials*.json
+*service-account*.json
+*.xlsx
+coverage/
+.DS_Store

@@ -1,0 +1,259 @@
+{
+  "source": "Uploaded artifacts 2026-11-05",
+  "originals_modified": false,
+  "workflow_exports": [
+    {
+      "filename": "Workflow 1 - Proposal Defense.json",
+      "sha256": "d6709a368b32b3a0df5df3cf126ee9e27dc5c85385e83710560e206697299b2e",
+      "name": "Workflow 1 - Proposal Defense",
+      "active_in_export": false,
+      "nodes": [
+        {
+          "name": "Google Sheets Trigger",
+          "type": "n8n-nodes-base.googleSheetsTrigger"
+        },
+        {
+          "name": "Send a message",
+          "type": "n8n-nodes-base.gmail"
+        },
+        {
+          "name": "HTML",
+          "type": "n8n-nodes-base.html"
+        },
+        {
+          "name": "Convert to File",
+          "type": "n8n-nodes-base.convertToFile"
+        },
+        {
+          "name": "Merge",
+          "type": "n8n-nodes-base.merge"
+        },
+        {
+          "name": "If",
+          "type": "n8n-nodes-base.if"
+        }
+      ]
+    },
+    {
+      "filename": "Workflow 2 - Semester 1 Progress.json",
+      "sha256": "5c1f53cb2eec1a248e4e8c8df878f520153fe361a0206ab6ace96a87254661ed",
+      "name": "Workflow 2 - Semester 1 Progress",
+      "active_in_export": false,
+      "nodes": [
+        {
+          "name": "Google Sheets Trigger",
+          "type": "n8n-nodes-base.googleSheetsTrigger"
+        },
+        {
+          "name": "Send a message",
+          "type": "n8n-nodes-base.gmail"
+        },
+        {
+          "name": "HTML",
+          "type": "n8n-nodes-base.html"
+        },
+        {
+          "name": "Convert to File",
+          "type": "n8n-nodes-base.convertToFile"
+        },
+        {
+          "name": "Merge",
+          "type": "n8n-nodes-base.merge"
+        }
+      ]
+    },
+    {
+      "filename": "Workflow 3.json",
+      "sha256": "b45aa2c4abffa8b2d4e21ead48e2b8cb2e3e2451602dcd6bac4feb1f14b232e7",
+      "name": "Workflow 3",
+      "active_in_export": false,
+      "nodes": [
+        {
+          "name": "Google Sheets Trigger",
+          "type": "n8n-nodes-base.googleSheetsTrigger"
+        },
+        {
+          "name": "Send a message",
+          "type": "n8n-nodes-base.gmail"
+        },
+        {
+          "name": "HTML",
+          "type": "n8n-nodes-base.html"
+        },
+        {
+          "name": "Convert to File",
+          "type": "n8n-nodes-base.convertToFile"
+        },
+        {
+          "name": "Merge",
+          "type": "n8n-nodes-base.merge"
+        },
+        {
+          "name": "If",
+          "type": "n8n-nodes-base.if"
+        }
+      ]
+    },
+    {
+      "filename": "Workflow 4 - Semester 2 Progress.json",
+      "sha256": "10875f476c0b96a747a72fe98e1e1c3e5f66cc90cf3fea6cf2583de3a8dbc7d3",
+      "name": "Workflow 4 - Semester 2 Progress",
+      "active_in_export": false,
+      "nodes": [
+        {
+          "name": "Google Sheets Trigger",
+          "type": "n8n-nodes-base.googleSheetsTrigger"
+        },
+        {
+          "name": "Send a message",
+          "type": "n8n-nodes-base.gmail"
+        },
+        {
+          "name": "HTML",
+          "type": "n8n-nodes-base.html"
+        },
+        {
+          "name": "Convert to File",
+          "type": "n8n-nodes-base.convertToFile"
+        },
+        {
+          "name": "Merge",
+          "type": "n8n-nodes-base.merge"
+        }
+      ]
+    },
+    {
+      "filename": "Workflow 5 - Final Report.json",
+      "sha256": "84546cd5adceebeaceb77d2417beb0b22456a7956923da4bb2cd231fd2f414ff",
+      "name": "Workflow 5 - Final Report",
+      "active_in_export": false,
+      "nodes": [
+        {
+          "name": "Google Sheets Trigger",
+          "type": "n8n-nodes-base.googleSheetsTrigger"
+        },
+        {
+          "name": "Send a message",
+          "type": "n8n-nodes-base.gmail"
+        },
+        {
+          "name": "HTML",
+          "type": "n8n-nodes-base.html"
+        },
+        {
+          "name": "Convert to File",
+          "type": "n8n-nodes-base.convertToFile"
+        },
+        {
+          "name": "Merge",
+          "type": "n8n-nodes-base.merge"
+        },
+        {
+          "name": "If",
+          "type": "n8n-nodes-base.if"
+        }
+      ]
+    },
+    {
+      "filename": "Workflow 6 - Final Eval.json",
+      "sha256": "a378620812fb97d6419399caf869ff0c19988ec531fee6a7db639318d312152f",
+      "name": "Workflow 6 - Final Eval",
+      "active_in_export": false,
+      "nodes": [
+        {
+          "name": "Google Sheets Trigger",
+          "type": "n8n-nodes-base.googleSheetsTrigger"
+        },
+        {
+          "name": "Send a message",
+          "type": "n8n-nodes-base.gmail"
+        },
+        {
+          "name": "HTML",
+          "type": "n8n-nodes-base.html"
+        },
+        {
+          "name": "Convert to File",
+          "type": "n8n-nodes-base.convertToFile"
+        },
+        {
+          "name": "Merge",
+          "type": "n8n-nodes-base.merge"
+        },
+        {
+          "name": "If",
+          "type": "n8n-nodes-base.if"
+        }
+      ]
+    },
+    {
+      "filename": "Workflow 7 - Final Grading.json",
+      "sha256": "3675cf2f1b2ef4b364a4a636ce79be02cf9a63343ef935a5114504f737ff7945",
+      "name": "Workflow 7 - Final Grading",
+      "active_in_export": false,
+      "nodes": [
+        {
+          "name": "Google Sheets Trigger",
+          "type": "n8n-nodes-base.googleSheetsTrigger"
+        },
+        {
+          "name": "Send a message",
+          "type": "n8n-nodes-base.gmail"
+        },
+        {
+          "name": "HTML",
+          "type": "n8n-nodes-base.html"
+        },
+        {
+          "name": "Convert to File",
+          "type": "n8n-nodes-base.convertToFile"
+        },
+        {
+          "name": "Merge",
+          "type": "n8n-nodes-base.merge"
+        },
+        {
+          "name": "If",
+          "type": "n8n-nodes-base.if"
+        }
+      ]
+    }
+  ],
+  "official_templates": [
+    {
+      "stage": "D1",
+      "source_filename": "Appendix_D1_-_Rubric_for_FYDP_Proposal (1).docx",
+      "sha256": "c4d57268097e07e4314013c57a4c07b6a2cdeb195d6e41e07ea2ddb1b40b3eba"
+    },
+    {
+      "stage": "D2",
+      "source_filename": "Appendix_D2_-_Rubric_for_Semester_1_Progress (2).docx",
+      "sha256": "9544440541605d35c9db78969f0c4d5fc100c6c640c682d9e0f46df5b3d0e98d"
+    },
+    {
+      "stage": "D3",
+      "source_filename": "Appendix_D3_-_Rubric_for_Semester_1_Evaluation (2).docx",
+      "sha256": "1e3455082506267734751953f92ca96e3e1054f5bd9c9c94b4c015169e826b43"
+    },
+    {
+      "stage": "D4",
+      "source_filename": "Appendix_D4_-_Rubric_for_Semester_2_Progress (1).docx",
+      "sha256": "c4b9cee4144ac529713d5f300686feda9febcf3c3b740f4c1077e3fde8ae96a0"
+    },
+    {
+      "stage": "D5",
+      "source_filename": "Appendix_D5_-_Rubric_for_Final_Report (1).docx",
+      "sha256": "c30d8597a4135eeb665f0aaae93352e96538d1b6ed7b77ff6b134d07fcc61c3a"
+    },
+    {
+      "stage": "D6",
+      "source_filename": "Appendix_D6_-_Rubric_for_Semester_2_Final_Evaluation (1).docx",
+      "sha256": "60adae19411b3ebdd0e0c0de2610a6196896e47dfb767c92205b332530ae3164"
+    },
+    {
+      "stage": "D7",
+      "source_filename": "Appendix_D7_-_FYDP_Consolidated_Grading_Sheet (1).docx",
+      "sha256": "65b5f82de9f1125da8ff548a252518c85824002c1f945ba78c28cbb5f0c28d8a"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# Replace the hostname and TLS paths with IT-approved values.
+# Run on the host, proxying only to the loopback-bound web container.
+server {
+    listen 80;
+    server_name replace-with-approved-domain;
+    return 308 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name replace-with-approved-domain;
+    ssl_certificate /etc/ssl/obe/fullchain.pem;
+    ssl_certificate_key /etc/ssl/obe/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    client_max_body_size 12m;
+    location /static/ {
+        alias /srv/obe-static/;
+        add_header X-Content-Type-Options nosniff;
+    }
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 120s;
+    }
+}
