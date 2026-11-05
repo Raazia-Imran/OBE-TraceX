@@ -20,7 +20,6 @@ The existing spreadsheet remains the source of marks. Excel/Google imports now r
 
 - [Simple form-to-final-report scenario](docs/START_TO_FINISH_GUIDE.md)
 - [Complete Windows CMD cloning and demo guide](docs/CLONE_AND_RUN_WINDOWS.md)
-
 - [Full development plan](docs/DEVELOPMENT_PLAN.md)
 - [Baseline inspection and known differences](docs/BASELINE_REVIEW.md)
 - [Testing and acceptance](docs/ACCEPTANCE.md)
@@ -35,25 +34,96 @@ Python / Django 5.2 LTS with HTML, CSS and progressive JavaScript. PostgreSQL is
 
 The repository is public. It intentionally excludes student workbooks, Google credentials, n8n databases, personal recipient addresses, raw workflow exports and generated reports. The seven original blank rubric templates are included, with their original bytes recorded in the manifest.
 
-## Local setup (Windows PowerShell)
+## Clone and run locally (Windows CMD)
 
-Requires Python 3.12+ and LibreOffice for PDF downloads. The web portal uses port **8000**; your n8n can stay on **5678**.
+Anyone can clone the public repository. You do not need a GitHub invitation while the repository remains public.
 
-```powershell
-git clone https://github.com/Raazia-Imran/OBE-TraceX.git
-cd OBE-TraceX
-py -3 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe manage.py migrate
-.\.venv\Scripts\python.exe manage.py provision_account coordinator --role coordinator --name "FYDP Coordinator"
-.\.venv\Scripts\python.exe manage.py provision_account hod --role hod --name "Head of Department"
-$env:SOFFICE_PATH = 'C:\Program Files\LibreOffice\program\soffice.exe'
-.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+**Requirements**
+
+- Git
+- Python 3.12 or a compatible newer version
+- Windows Command Prompt (CMD)
+- VS Code (recommended, but not required)
+- LibreOffice is optional for PDF rendering; the local launcher can use the installed Microsoft Word PDF fallback.
+
+Check that Git and Python are available:
+
+```bat
+git --version
+py -3 --version
 ```
 
-Open http://127.0.0.1:8000. Choose unique passwords interactively; **there are no default usernames/passwords or public registration**. The example account names above are the names you create, not pre-existing accounts. Keep LibreOffice's path aligned with the actual installation.
+**1. Clone the repository**
 
-For Linux/macOS replace `.\.venv\Scripts\python.exe` with `.venv/bin/python` and use `python3 -m venv .venv`.
+Choose a folder where you keep projects. The example below uses `D:\\ALL PROJECTS`; replace it with your own folder if needed.
+
+```bat
+if not exist "D:\\ALL PROJECTS" mkdir "D:\\ALL PROJECTS"
+cd /d "D:\\ALL PROJECTS"
+git clone https://github.com/Raazia-Imran/OBE-TraceX.git
+cd OBE-TraceX
+```
+
+If you have already cloned the project, do not clone it again into the same folder. Update the existing copy instead:
+
+```bat
+cd /d "D:\\ALL PROJECTS\\OBE-TraceX"
+git status
+git pull --ff-only
+```
+
+If Git reports local changes, preserve and resolve them before pulling. Do not use `git reset --hard` to discard work.
+
+**2. Create the virtual environment and install dependencies**
+
+```bat
+py -3 -m venv .venv
+.venv\\Scripts\\python.exe -m pip install -r requirements.txt
+```
+
+**3. Set up the local database**
+
+```bat
+.venv\\Scripts\\python.exe manage.py migrate
+.venv\\Scripts\\python.exe manage.py check
+```
+
+This creates a separate local SQLite database named `local.sqlite3`. It is not your teammate's database, the university workbook or n8n's database.
+
+**4. Create your own local login accounts**
+
+Run these commands once for a fresh local database:
+
+```bat
+.venv\\Scripts\\python.exe manage.py provision_account coordinator --role coordinator --name "FYDP Coordinator"
+.venv\\Scripts\\python.exe manage.py provision_account hod --role hod --name "Head of Department"
+```
+
+Enter a unique password of at least 14 characters when prompted. The password will not appear on screen while you type. There are no shared default passwords and no public registration. If the accounts already exist, do not create them again.
+
+**5. Start the portal**
+
+From the repository folder, run:
+
+```bat
+"Start Portal.cmd"
+```
+
+You can also double-click **Start Portal.cmd** in the project folder. Keep its CMD window open while using the portal.
+
+Open this address in your browser:
+
+[http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+**Important notes**
+
+- Cloning downloads the source code only. It does not copy another person's local database, student records, passwords, Google authorization or n8n credentials.
+- Each teammate has a separate local database and must create their own local passwords.
+- Google Sheets and n8n connections require separate, authorized configuration. Follow [the integration guide](integrations/README.md); never commit credential files, passwords or real student data to GitHub.
+- No synthetic students are added automatically. If you want to explore the clearly labelled synthetic demo, follow the [complete Windows CMD guide](docs/CLONE_AND_RUN_WINDOWS.md).
+- Do not expose Django's local development server to the public internet. This setup is for local development and demonstration, not university production deployment.
+
+For troubleshooting, updating an existing clone, the optional demo walkthrough, and further setup details, see [docs/CLONE_AND_RUN_WINDOWS.md](docs/CLONE_AND_RUN_WINDOWS.md).
 
 ## First use with real records
 
@@ -66,9 +136,9 @@ For Linux/macOS replace `.\.venv\Scripts\python.exe` with `.venv/bin/python` and
 ## Verify
 
 ```powershell
-.\.venv\Scripts\python.exe manage.py test evaluations
-.\.venv\Scripts\python.exe manage.py check
-.\.venv\Scripts\python.exe manage.py template_sample --output .\private-samples
+.\\venv\\Scripts\\python.exe manage.py test evaluations
+.\\venv\\Scripts\\python.exe manage.py check
+.\\venv\\Scripts\\python.exe manage.py template_sample --output .\\private-samples
 ```
 
 `template_sample` generates clearly named synthetic verification files and does not change the original templates. Review them in Word and the target server's PDF renderer. Production must run PostgreSQL integration tests and a backup/restore drill in addition to these checks.
