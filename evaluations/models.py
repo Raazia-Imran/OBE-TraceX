@@ -5,6 +5,7 @@ from .rubrics import STAGE_CHOICES
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     role = models.CharField(max_length=16, choices=[('coordinator', 'FYDP Coordinator'), ('hod', 'Head of Department')])
+    avatar = models.BinaryField(null=True, blank=True, editable=False)
     mfa_secret = models.TextField(blank=True)
     mfa_counter = models.BigIntegerField(default=-1)
 class AcademicSession(models.Model):

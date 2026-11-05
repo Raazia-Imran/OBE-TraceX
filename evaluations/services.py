@@ -47,7 +47,7 @@ def receive_evaluation(payload, actor=None):
         now = timezone.now()
         reason = ''
         if FrozenResult.objects.filter(group=group, stage__in=[stage, 'FINAL'], active=True).exists():
-            reason = 'Stage or final result is frozen. HOD reopening and correction approval required.'
+            reason = 'Stage or final result is frozen. Coordinator reopening and correction approval required.'
         elif latest:
             reason = 'Existing evaluation changed. Coordinator correction approval required.'
         elif (assignment.opens_at and now < assignment.opens_at) or (assignment.closes_at and now > assignment.closes_at):
@@ -90,7 +90,7 @@ def stage_result(group, stage):
         from .master_sync import master_stage_result
         return master_stage_result(group, stage)
     errors, students = [], []
-    if not group.session.rules_approved: errors.append('HOD must approve grading, rounding and evaluator policy for this session.')
+    if not group.session.rules_approved: errors.append('Coordinator must approve grading, rounding and evaluator policy for this session.')
     members = list(group.students.all())
     if len(members) != group.expected_members: errors.append('Roster does not match the expected group size.')
     if not 1 <= len(members) <= 4: errors.append('The supplied official templates support one to four members.')

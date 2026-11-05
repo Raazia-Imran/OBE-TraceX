@@ -293,3 +293,48 @@ def sample_template(request, stage, extension):
     response = HttpResponse(content, content_type='application/pdf' if extension == 'pdf' else 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     response['Content-Disposition'] = f'attachment; filename="SAMPLE_ONLY_{stage}.{extension}"'
     return response
+
+
+def about(request):
+    return render(request, 'evaluations/about.html')
+
+
+def privacy(request):
+    return render(request, 'evaluations/privacy.html')
+
+
+@login_required
+def profile(request):
+    from .forms import ProfileForm
+    from django.contrib.auth import get_user_model
+    form = ProfileForm(request.POST or None, request.FILES or None, user=request.user,
+                       initial={'first_name':request.user.first_name, 'last_name':request.user.last_name, 'email':request.user.email})
+    if request.method == 'POST' and form.is_valid():
+        with transaction.atomic():
+            user = get_user_model().objects.select_for_update().get(pk=request.user.pk)
+            person = Profile.objects.select_for_update().get(user=user)
+            # Recheck after locking, so a concurrent email change cannot bypass confirmation.
+            if form.cleaned_data['email'] != user.email and not user.check_password(form.cleaned_data['current_password']):
+                form.add_error('current_password', 'Confirm your current password.')
+            else:
+                fields = ['first_name', 'last_name', 'email']
+                changed = [field for field in fields if getattr(user, field) != form.cleaned_data[field]]
+                for field in fields: setattr(user, field, form.cleaned_data[field])
+                user.save(update_fields=fields)
+                if form.cleaned_data['photo'] is not None or form.cleaned_data['remove_photo']:
+                    person.avatar = form.cleaned_data['photo']
+                    person.save(update_fields=['avatar'])
+                    changed.append('photo')
+                if changed: audit(request.user, 'account.profile_updated', user.pk, {'fields':changed})
+                messages.success(request, 'Your profile has been saved.')
+                return redirect('profile')
+    return render(request, 'evaluations/profile.html', context(request, form=form))
+
+
+@login_required
+def avatar(request):
+    image = request.user.profile.avatar
+    if not image: return HttpResponse(status=404)
+    response = HttpResponse(bytes(image), content_type='image/jpeg')
+    response['X-Content-Type-Options'] = 'nosniff'
+    return response

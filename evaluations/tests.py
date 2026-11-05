@@ -307,3 +307,65 @@ class GoogleBridgeTests(TestCase):
         self.assertTrue(all(len(rows)==2 for rows in validated_tabs(result).values()))
         result[0]['values'][-1]=['SE21078',20]
         with self.assertRaises(ValueError):validated_tabs(result)
+
+class ProfileExperienceTests(TestCase):
+    def setUp(self):
+        self.user=get_user_model().objects.create_user('profile-coordinator',password='Private-test-password-2026')
+        self.hod=get_user_model().objects.create_user('profile-hod',password='Private-test-password-2026')
+        for user,role in [(self.user,'coordinator'),(self.hod,'hod')]:Profile.objects.create(user=user,role=role)
+
+    def test_intro_and_privacy_are_public_without_forcing_a_view(self):
+        for url in ['/about/','/privacy/','/login/']:
+            response=self.client.get(url)
+            self.assertEqual(response.status_code,200)
+        response=self.client.get('/about/')
+        self.assertContains(response,'Play the story')
+        self.assertContains(response,'Skip to sign in')
+        self.assertNotContains(response,'<iframe')
+
+    def test_both_roles_update_only_their_own_profile_and_keep_authorization(self):
+        for user in [self.user,self.hod]:
+            self.client.force_login(user)
+            response=self.client.post('/account/profile/',{'first_name':'Updated','last_name':'Name','email':'','role':'coordinator','username':'intruder','is_superuser':'true','user_id':self.user.pk})
+            self.assertRedirects(response,'/account/profile/')
+            user.refresh_from_db()
+            self.assertEqual(user.first_name,'Updated')
+            self.assertFalse(user.is_superuser)
+        self.hod.refresh_from_db()
+        self.assertEqual(self.hod.username,'profile-hod')
+        self.assertEqual(self.hod.profile.role,'hod')
+        self.assertEqual(self.client.get('/imports/').status_code,403)
+
+    def test_email_requires_current_password_and_changes_are_audited(self):
+        self.client.force_login(self.user)
+        self.client.post('/account/profile/',{'email':'new@example.test'})
+        self.user.refresh_from_db();self.assertEqual(self.user.email,'')
+        self.client.post('/account/profile/',{'first_name':'A','email':'new@example.test','current_password':'Private-test-password-2026'})
+        self.user.refresh_from_db();self.assertEqual(self.user.email,'new@example.test')
+        event=AuditEvent.objects.get(action='account.profile_updated')
+        self.assertNotIn('new@example.test',str(event.detail if hasattr(event,'detail') else event.metadata))
+
+    def test_photo_is_rasterized_and_available_only_after_sign_in(self):
+        from PIL import Image
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        buffer=io.BytesIO();Image.new('RGB',(320,200),'red').save(buffer,format='PNG')
+        self.client.force_login(self.hod)
+        response=self.client.post('/account/profile/',{'photo':SimpleUploadedFile('photo.png',buffer.getvalue()+b'<script>bad()</script>',content_type='image/png')})
+        self.assertRedirects(response,'/account/profile/')
+        picture=self.client.get('/account/avatar/')
+        self.assertEqual(picture['Content-Type'],'image/jpeg')
+        self.assertEqual(Image.open(io.BytesIO(picture.content)).size,(256,256))
+        self.assertNotIn(b'<script>',picture.content)
+        self.client.logout();self.assertEqual(self.client.get('/account/avatar/').status_code,302)
+        self.client.force_login(self.user);self.assertEqual(self.client.get('/account/avatar/').status_code,404)
+        self.client.force_login(self.hod);self.client.post('/account/profile/',{'remove_photo':'on'})
+        self.assertEqual(self.client.get('/account/avatar/').status_code,404)
+
+    def test_fake_or_oversized_photos_are_rejected_and_csrf_remains_required(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        self.client.force_login(self.user)
+        for content in [b'<svg onload="alert(1)"/>',b'0'*(2*1024*1024+1)]:
+            self.client.post('/account/profile/',{'photo':SimpleUploadedFile('photo.png',content,content_type='image/png')})
+            self.user.profile.refresh_from_db();self.assertFalse(self.user.profile.avatar)
+        protected=Client(enforce_csrf_checks=True);protected.force_login(self.user)
+        self.assertEqual(protected.post('/account/profile/',{'first_name':'Forged'}).status_code,403)

@@ -2,6 +2,8 @@ from django.urls import path
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from evaluations import views
 urlpatterns = [
+ path('about/', views.about, name='about'), path('privacy/', views.privacy, name='privacy'),
+ path('account/profile/', views.profile, name='profile'), path('account/avatar/', views.avatar, name='avatar'),
  path('healthz/', views.health, name='health'), path('login/', views.signin, name='login'),
  path('logout/', views.signout, name='logout'), path('', views.dashboard, name='dashboard'),
  path('groups/<int:pk>/', views.group_detail, name='group'), path('groups/<int:pk>/action/', views.result_action, name='result_action'),
