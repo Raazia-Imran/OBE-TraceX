@@ -1,5 +1,7 @@
 # OBE-TraceX From a Google Form to the Final Printed Record
 
+**Workflow correction:** Use [the current real-group integration guide](REAL_GROUP_END_TO_END.md). The primary importer now reads the existing D7 master totals and supporting criterion tabs; re-entering evaluator assignments or regrading raw submissions is not required for this route. Older raw-event/demo sections below describe the optional legacy path.
+
 This guide explains the working local pilot in simple English. It also identifies the connections that still need setup before real departmental use.
 
 ## 1 What you already have

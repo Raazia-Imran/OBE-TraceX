@@ -1,5 +1,7 @@
 # OBE-TraceX Development Plan
 
+**Workflow correction:** Use [the current real-group integration guide](REAL_GROUP_END_TO_END.md). The primary importer now reads the existing D7 master totals and supporting criterion tabs; re-entering evaluator assignments or regrading raw submissions is not required for this route. Older raw-event/demo sections below describe the optional legacy path.
+
 ## Purpose and confirmed requirements
 
 Extend Raazia's tested assessment automation into a department-owned portal. Preserve the six forms, raw response history, master workbook and seven n8n workflows. Keep individual n8n reports as additional summaries. Create official group-based D1–D7 documents from the supplied original layouts after all evaluations and final approvals are complete.

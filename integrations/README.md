@@ -1,5 +1,7 @@
 # Integration with existing n8n and Google Sheets
 
+**Workflow correction:** Use [the current real-group integration guide](../docs/REAL_GROUP_END_TO_END.md). The primary importer now reads the existing D7 master totals and supporting criterion tabs; re-entering evaluator assignments or regrading raw submissions is not required for this route. Older raw-event/demo sections below describe the optional legacy path.
+
 ## Preserve the baseline
 
 Keep n8n on port 5678 and the portal on port 8000 during development. Export and privately back up n8n workflows, persistent database and encryption key before a future migration. This repository stores hashes of the seven supplied exports, not their private credential/recipient bindings.

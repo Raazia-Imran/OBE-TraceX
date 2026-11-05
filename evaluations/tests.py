@@ -230,3 +230,32 @@ class PortalTests(TestCase):
         with patch('evaluations.reports.populate',side_effect=render_and_reopen):
             with self.assertRaises(ValueError): export_report(self.group,'D1','docx',self.coordinator)
         self.assertEqual(Report.objects.count(),0)
+
+    def test_master_import_preserves_existing_totals_and_needs_no_evaluator_assignment(self):
+        from .master_sync import import_master,MASTER_TAB,SCORE_HEADERS
+        Assignment.objects.all().delete()
+        tabs={MASTER_TAB:[['Seat Number / Roll Number',*SCORE_HEADERS,'TOTAL (200)'],['SE-99001',10.5,20,42.6,48,32,40,193],['SE-99002',10.5,20,42.6,48,32,40,193]]}
+        from .master_sync import AVERAGED
+        for stage,name in AVERAGED.items():
+            vals={'D1':[2.5,2.5,2.75,2.75],'D3':[9.6,10.8,11.4,10.8],'D5':[4]*8,'D6':[8]*5}[stage]
+            tabs[name]=[['Seat Number',*[f'Avg {i}' for i in range(len(vals))]],['SE-99001',*vals],['SE-99002',*vals]]
+        for stage in ['D2','D4']:
+            prefix='Proposal Evaluation Criteria' if stage=='D2' else 'Semester 2 Progress Performance'
+            cols=[f'{prefix} [{r}. Criterion]' for r in ['I','II','III','IV']]
+            if stage=='D4':cols+=['V. Timely Report Submission (PLO-11)']
+            tabs['D2_S1_Progress' if stage=='D2' else 'D4_S2_Progress']=[['Seat Number / Roll Number',*cols],['SE-99001',*['Excellent (100%)']*len(cols)],['SE-99002',*['Excellent (100%)']*len(cols)]]
+        result=import_master(tabs,self.session,self.coordinator,'source-file-hash')
+        self.assertEqual(result['issues'],[])
+        for stage in STAGES:self.freeze(stage)
+        self.group.refresh_from_db();final=freeze_final(self.group.pk,self.hod,self.group.version,'Approve existing source master totals.')
+        self.assertEqual(final.payload['students'][0]['total'],'193')
+        self.assertEqual(Evaluation.objects.count(),0)
+        self.assertEqual(final.payload['students'][0]['stages'][2],'42.6')
+    def test_master_discrepancies_are_flagged_not_repaired(self):
+        from .master_sync import import_master,MASTER_TAB,SCORE_HEADERS
+        tabs={MASTER_TAB:[['Seat Number / Roll Number',*SCORE_HEADERS,'TOTAL (200)'],['SE-99001',9,20,48,19.2,32,40,168.2]]}
+        result=import_master(tabs,self.session,self.coordinator,'bad-source')
+        self.assertTrue(result['issues'])
+        record=MasterRecord.objects.get(student=self.students[0])
+        self.assertEqual(record.payload['reported_stages']['D4'],'19.2')
+        with self.assertRaises(ValueError):self.freeze('D4')

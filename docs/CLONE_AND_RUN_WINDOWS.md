@@ -1,5 +1,7 @@
 # Clone and Try OBE-TraceX on Windows
 
+**Workflow correction:** Use [the current real-group integration guide](REAL_GROUP_END_TO_END.md). The primary importer now reads the existing D7 master totals and supporting criterion tabs; re-entering evaluator assignments or regrading raw submissions is not required for this route. Older raw-event/demo sections below describe the optional legacy path.
+
 These instructions use **Command Prompt (CMD)**. Your existing n8n remains on port 5678. The new portal runs on port 8000 in its own CMD window.
 
 ## 1 Install prerequisites

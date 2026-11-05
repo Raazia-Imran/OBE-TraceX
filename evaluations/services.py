@@ -85,6 +85,10 @@ def resolve_change(change_id, actor, approve, note):
 
 
 def stage_result(group, stage):
+    from .models import MasterRecord
+    if MasterRecord.objects.filter(student__group=group).exists() or not Assignment.objects.filter(student__group=group).exists():
+        from .master_sync import master_stage_result
+        return master_stage_result(group, stage)
     errors, students = [], []
     if not group.session.rules_approved: errors.append('HOD must approve grading, rounding and evaluator policy for this session.')
     members = list(group.students.all())
@@ -150,6 +154,12 @@ def freeze_final(group_id, actor, expected_version, note):
     for seat, name in roster:
         parts = [next(x for x in sources[stage].payload['students'] if x['seat'] == seat)['total'] for stage in STAGES]
         total = sum(number(x) for x in parts)
+        from .models import MasterRecord
+        master = MasterRecord.objects.filter(student__group=group, student__seat=seat).first()
+        if master:
+            if master.errors or master.payload.get('final') is None:
+                raise ValueError('Master workbook has unresolved reconciliation issues.')
+            total = number(master.payload['final'])
         students.append({'seat': seat, 'name': name, 'stages': parts, 'total': str(total), 'display_total': display(total)})
     data = {'students': students, 'stages': {k: str(v.pk) for k, v in sources.items()}, 'ruleset': RULESET,
             'project_id': group.project_id, 'project_title': group.title, 'session': group.session.label,

@@ -109,3 +109,10 @@ class WebhookReceipt(models.Model):
     event_id = models.UUIDField(primary_key=True)
     digest = models.CharField(max_length=64)
     received_at = models.DateTimeField(auto_now_add=True)
+
+class MasterRecord(models.Model):
+    student = models.OneToOneField(Student, on_delete=models.PROTECT)
+    payload = models.JSONField()
+    digest = models.CharField(max_length=64)
+    errors = models.JSONField(default=list)
+    synced_at = models.DateTimeField(auto_now=True)

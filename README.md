@@ -6,6 +6,12 @@ OBE-TraceX means Outcome-Based Education Tracking, Analysis, and Execution. This
 
 **Current release: tested local pilot.** It includes Coordinator/HOD workspaces, assigned-evaluator validation, correction review, immutable approved snapshots, final approval, original-template Word/PDF generation, source imports and a signed integration endpoint. University deployment, live credential binding and faculty acceptance are still required.
 
+## Corrected master-workbook flow
+
+The existing spreadsheet remains the source of marks. Excel/Google imports now read D7 totals and supporting criterion tabs. Portal records hold approvals and frozen copies; they do not replace the tested spreadsheet grading pipeline. Evaluator assignments are only part of the legacy raw-event path, not a prerequisite for the master-workbook route.
+
+[Read the corrected real-group test, PostgreSQL and live connection guide](docs/REAL_GROUP_END_TO_END.md). No synthetic students are added automatically.
+
 ## Start here
 
 - [Simple form-to-final-report scenario](docs/START_TO_FINISH_GUIDE.md)
@@ -45,20 +51,13 @@ Open http://127.0.0.1:8000. Choose unique passwords interactively; **there are n
 
 For Linux/macOS replace `.\.venv\Scripts\python.exe` with `.venv/bin/python` and use `python3 -m venv .venv`.
 
-## First use
+## First use with real records
 
-1. Coordinator: create a session with the official course code.
-2. Import a CSV roster with authoritative seat numbers, names, project IDs/titles and expected membership (1–4 in the supplied templates).
-3. Import assigned evaluator emails for each student and stage. A format-valid seat still needs roster membership.
-4. Read an XLSX workbook or configure the optional read-only Google Sheets connection.
-5. Review import issues; ambiguous evaluator identity and duplicate responses do not silently enter averages.
-6. HOD: approve the academic policy only after faculty confirms criteria, weights, averaging, rounding and report units.
-7. Coordinator: review and freeze each of D1–D6 for a group. Missing work and pending corrections block freezing.
-8. HOD: approve the final result after all six stages are frozen.
-9. HOD: compare synthetic populated document samples against originals, then verify template hashes in QEC documents.
-10. Download each group's D1–D7 Word/PDF records from the final result. PDF export requires LibreOffice.
-
-CSV samples under `examples/` contain synthetic identities only. Never upload them to the live university source workbook.
+1. Create an academic session and import its official group roster.
+2. Read the existing master workbook through XLSX upload or the configured read-only Google connection.
+3. Review source reconciliation issues. No evaluator re-entry is required for this route.
+4. Coordinator freezes reviewed stages; HOD approves the final result and exact template versions.
+5. Download D1–D7 group records. For a controlled historical test and optional continuous reads, follow the real-group guide above.
 
 ## Verify
 

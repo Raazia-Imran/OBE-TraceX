@@ -86,15 +86,19 @@ def workbook_import(content, session, actor):
     workbook = openpyxl.load_workbook(io.BytesIO(content), read_only=True, data_only=True)
     try:
         tabs = {}
-        for name in RAW_TABS.values():
+        from .master_sync import READ_TABS
+        for name in READ_TABS:
             if name in workbook:
                 sheet = workbook[name]
                 rows = []
-                for i, row in enumerate(sheet.iter_rows(values_only=True)):
-                    if i >= 10000: raise ValueError('Raw response tab exceeds 10,000 rows. Use a bounded session workbook.')
+                for i, row in enumerate(sheet.iter_rows(max_row=50001, max_col=26, values_only=True)):
+                    seat_column=3 if name in RAW_TABS.values() else 2
+                    if i and (len(row)<=seat_column or row[seat_column] is None or not str(row[seat_column]).strip()): continue
+                    if i>=50000 or len(rows)>=10000: raise ValueError('Populated source data exceeds the import boundary.')
                     rows.append(list(row))
                 tabs[name] = rows
-        return inspect_and_import(tabs, session, actor, hashlib.sha256(content).hexdigest())
+        from .master_sync import import_master
+        return import_master(tabs, session, actor, hashlib.sha256(content).hexdigest())
     finally: workbook.close()
 
 @transaction.atomic
