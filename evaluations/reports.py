@@ -81,11 +81,21 @@ def render_pdf(content):
     with tempfile.TemporaryDirectory(prefix='obe-report-') as folder:
         source = Path(folder) / 'rubric.docx'
         source.write_bytes(content)
-        try:
+        import os, shutil
+        if os.name == 'nt' and os.getenv('OBE_WORD_PDF') == '1' and not shutil.which(settings.SOFFICE_PATH):
+            # Desktop trial only: use the user's installed Word, with macros disabled.
+            script = "$w=New-Object -ComObject Word.Application;$w.Visible=$false;$w.DisplayAlerts=0;$w.AutomationSecurity=3;try{$d=$w.Documents.Open('SOURCE',$false,$true);$d.ExportAsFixedFormat('TARGET',17)}finally{if($d){$d.Close(0)};$w.Quit()}"
+            script = script.replace('SOURCE', str(source).replace("'", "''")).replace('TARGET',str(Path(folder)/'rubric.pdf').replace("'", "''"))
+            try:
+                subprocess.run(['powershell','-NoProfile','-NonInteractive','-Command',script],check=True,capture_output=True,timeout=75)
+            except (subprocess.SubprocessError,OSError) as error:
+                raise ValueError('Word PDF conversion failed. Check the local Office installation.') from error
+        else:
+          try:
             subprocess.run([settings.SOFFICE_PATH, '--headless', f'-env:UserInstallation=file://{folder}/profile',
                             '--convert-to', 'pdf', '--outdir', folder, str(source)],
                            check=True, capture_output=True, timeout=75)
-        except (subprocess.SubprocessError, OSError) as error:
+          except (subprocess.SubprocessError, OSError) as error:
             raise ValueError('PDF conversion unavailable. Check the server LibreOffice installation.') from error
         pdf = Path(folder) / 'rubric.pdf'
         if not pdf.exists() or not pdf.read_bytes().startswith(b'%PDF-'): raise ValueError('Renderer did not produce a valid PDF.')
@@ -95,11 +105,11 @@ def export_report(group, stage, extension, actor):
     require(actor, ['coordinator', 'hod'])
     if extension not in ('docx', 'pdf'): raise ValueError('Unsupported report format.')
     final = FrozenResult.objects.filter(group=group, stage='FINAL', active=True).first()
-    if not final: raise ValueError('HOD final approval is required before official QEC export.')
+    if not final: raise ValueError('Coordinator final approval is required before official QEC export.')
     if digest(final.payload) != final.digest: raise ValueError('Frozen data integrity check failed.')
     tdigest = hashlib.sha256(template_path(stage).read_bytes()).hexdigest()
     if not TemplateApproval.objects.filter(stage=stage, digest=tdigest).exists():
-        raise ValueError('HOD must verify this exact template before official export.')
+        raise ValueError('Coordinator must verify this exact template before official export.')
     if stage == 'D7': payload = final.payload
     else:
         result = FrozenResult.objects.get(pk=final.payload['stages'][stage], active=True)

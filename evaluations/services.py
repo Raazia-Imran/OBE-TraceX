@@ -135,7 +135,7 @@ def freeze_stage(group_id, stage, actor, expected_version, note):
 
 @transaction.atomic
 def freeze_final(group_id, actor, expected_version, note):
-    require(actor, ['hod'])
+    require(actor, ['coordinator'])
     if len(note.strip()) < 10: raise ValueError('A final approval note is required.')
     group = ProjectGroup.objects.select_for_update().select_related('session').get(pk=group_id)
     if group.version != int(expected_version): raise ValueError('Results changed since review. Reload before approval.')
@@ -174,7 +174,7 @@ def freeze_final(group_id, actor, expected_version, note):
 
 @transaction.atomic
 def reopen(group_id, stage, actor, note):
-    require(actor, ['hod'])
+    require(actor, ['coordinator'])
     if stage not in (*STAGES, 'FINAL'): raise ValueError('Unknown stage.')
     if len(note.strip()) < 10: raise ValueError('A reason of at least 10 characters is required.')
     group = ProjectGroup.objects.select_for_update().get(pk=group_id)

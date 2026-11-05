@@ -43,7 +43,7 @@ class PortalTests(TestCase):
     def final(self):
         for stage in STAGES: self.complete(stage); self.freeze(stage)
         self.group.refresh_from_db()
-        return freeze_final(self.group.pk, self.hod, self.group.version, 'HOD approves synthetic test results.')
+        return freeze_final(self.group.pk, self.coordinator, self.group.version, 'HOD approves synthetic test results.')
     def test_weighted_d4_and_maximum(self):
         self.assertEqual(sum(weighted('D4', [50,50,50,50,0])), Decimal('20'))
         self.assertEqual(sum(weighted('D4', [75,75,75,75,0])), Decimal('30'))
@@ -86,13 +86,13 @@ class PortalTests(TestCase):
     def test_role_separation(self):
         self.complete('D1')
         with self.assertRaises(PermissionDenied): freeze_stage(self.group.pk,'D1',self.hod,1,'Review reference note.')
-        with self.assertRaises(PermissionDenied): freeze_final(self.group.pk,self.coordinator,1,'Review reference note.')
+        with self.assertRaises(PermissionDenied): freeze_final(self.group.pk,self.hod,1,'Review reference note.')
     def test_final_requires_all_stages(self):
-        with self.assertRaises(ValueError): freeze_final(self.group.pk,self.hod,1,'Review reference note.')
+        with self.assertRaises(ValueError): freeze_final(self.group.pk,self.coordinator,1,'Review reference note.')
     def test_complete_final_and_reopen_history(self):
         final=self.final()
         self.assertEqual(final.payload['students'][0]['total'], '200')
-        reopen(self.group.pk,'D1',self.hod,'Correction reopening approved by HOD.')
+        reopen(self.group.pk,'D1',self.coordinator,'Correction reopening approved by HOD.')
         final.refresh_from_db(); self.assertFalse(final.active)
         self.assertEqual(final.payload['students'][0]['total'], '200')
         self.assertEqual(FrozenResult.objects.count(),7)
@@ -104,10 +104,10 @@ class PortalTests(TestCase):
         self.assertEqual(result.payload['students'][0]['total'],'9.00')
         self.assertEqual(result.payload['students'][0]['evaluators'],2)
     def test_pending_change_blocks_final(self):
-        self.final(); reopen(self.group.pk,'FINAL',self.hod,'Reopen final for pending review.')
+        self.final(); reopen(self.group.pk,'FINAL',self.coordinator,'Reopen final for pending review.')
         receive_evaluation(self.payload(percent=50))
         self.group.refresh_from_db()
-        with self.assertRaises(ValueError): freeze_final(self.group.pk,self.hod,self.group.version,'Review reference note.')
+        with self.assertRaises(ValueError): freeze_final(self.group.pk,self.coordinator,self.group.version,'Review reference note.')
     def test_schedule(self):
         assignment=Assignment.objects.get(student=self.students[0],stage='D1')
         assignment.closes_at=timezone.now()-timezone.timedelta(days=1);assignment.save()
@@ -225,7 +225,7 @@ class PortalTests(TestCase):
         TemplateApproval.objects.create(stage='D1',digest=hashlib.sha256(template_path('D1').read_bytes()).hexdigest(),approved_by=self.hod,note='Synthetic template verification reference.')
         def render_and_reopen(stage,payload):
             content=populate(stage,payload)
-            reopen(self.group.pk,'D1',self.hod,'HOD reopened during synthetic export test.')
+            reopen(self.group.pk,'D1',self.coordinator,'HOD reopened during synthetic export test.')
             return content
         with patch('evaluations.reports.populate',side_effect=render_and_reopen):
             with self.assertRaises(ValueError): export_report(self.group,'D1','docx',self.coordinator)
@@ -247,7 +247,7 @@ class PortalTests(TestCase):
         result=import_master(tabs,self.session,self.coordinator,'source-file-hash')
         self.assertEqual(result['issues'],[])
         for stage in STAGES:self.freeze(stage)
-        self.group.refresh_from_db();final=freeze_final(self.group.pk,self.hod,self.group.version,'Approve existing source master totals.')
+        self.group.refresh_from_db();final=freeze_final(self.group.pk,self.coordinator,self.group.version,'Approve existing source master totals.')
         self.assertEqual(final.payload['students'][0]['total'],'193')
         self.assertEqual(Evaluation.objects.count(),0)
         self.assertEqual(final.payload['students'][0]['stages'][2],'42.6')
@@ -259,3 +259,43 @@ class PortalTests(TestCase):
         record=MasterRecord.objects.get(student=self.students[0])
         self.assertEqual(record.payload['reported_stages']['D4'],'19.2')
         with self.assertRaises(ValueError):self.freeze('D4')
+
+    def test_hod_is_read_download_only(self):
+        self.client.force_login(self.hod)
+        response=self.client.post(f'/sessions/{self.session.pk}/approve/',{'note':'Unauthorized policy change attempt','confirm':'yes'})
+        self.assertEqual(response.status_code,403)
+        self.assertEqual(self.client.post('/templates/',{'stage':'D1'}).status_code,403)
+        self.assertEqual(self.client.get('/templates/').status_code,200)
+        with self.assertRaises(PermissionDenied):reopen(self.group.pk,'D1',self.hod,'An unauthorized reopening attempt.')
+
+class GoogleBridgeTests(TestCase):
+    def test_reader_extracts_only_successful_google_node(self):
+        from tools.refresh_n8n_master import extract_result
+        payload={'spreadsheetId':'known','valueRanges':[]}
+        result={'data':{'resultData':{'runData':{'Read Master':[{'data':{'main':[[{'json':payload}]]}}]}}}}
+        self.assertEqual(extract_result('Startup log\n'+json.dumps(result)),payload)
+        with self.assertRaises(ValueError): extract_result('Startup only')
+        with self.assertRaises(ValueError): extract_result(json.dumps({'data':{'resultData':{'error':{'message':'private'}}}}))
+
+    def test_google_ranges_must_be_complete_and_in_expected_order(self):
+        from .google_sync import validated_tabs
+        from .master_sync import READ_TABS
+        result=[{'range':f"'{name}'!A1:Z9999",'values':[]} for name in READ_TABS]
+        self.assertEqual(list(validated_tabs(result)),list(READ_TABS))
+        with self.assertRaises(ValueError): validated_tabs(result[:-1])
+        with self.assertRaises(ValueError): validated_tabs(list(reversed(result)))
+
+    @override_settings(OBE_N8N_BRIDGE='reader.py',OBE_MASTER_SNAPSHOT='snapshot.json',GOOGLE_WORKBOOK_ID='expected')
+    def test_bridge_rejects_wrong_workbook_without_importing(self):
+        from .google_sync import sync_google
+        with patch('subprocess.run'),patch('pathlib.Path.read_text',return_value=json.dumps({'spreadsheetId':'wrong','valueRanges':[]})),patch('evaluations.google_sync.import_master') as importer:
+            with self.assertRaises(ValueError): sync_google(None,None)
+            importer.assert_not_called()
+
+    @override_settings(OBE_N8N_BRIDGE='reader.py',OBE_MASTER_SNAPSHOT='snapshot.json',GOOGLE_WORKBOOK_ID='expected')
+    def test_failed_refresh_never_imports_an_old_snapshot(self):
+        import subprocess
+        from .google_sync import sync_google
+        with patch('subprocess.run',side_effect=subprocess.CalledProcessError(1,'reader')),patch('pathlib.Path.read_text') as read:
+            with self.assertRaises(ValueError):sync_google(None,None)
+            read.assert_not_called()

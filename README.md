@@ -12,6 +12,10 @@ The existing spreadsheet remains the source of marks. Excel/Google imports now r
 
 [Read the corrected real-group test, PostgreSQL and live connection guide](docs/REAL_GROUP_END_TO_END.md). No synthetic students are added automatically.
 
+## Local trial role update
+
+[Current local setup and role policy](docs/LOCAL_TRIAL.md): Coordinator manages all academic actions; HOD views and downloads. SQLite is used for the laptop trial.
+
 ## Start here
 
 - [Simple form-to-final-report scenario](docs/START_TO_FINISH_GUIDE.md)

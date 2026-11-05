@@ -174,7 +174,7 @@ def sessions(request):
 @require_POST
 @transaction.atomic
 def approve_rules(request, pk):
-    require(request.user, ['hod'])
+    require(request.user, ['coordinator'])
     session = get_object_or_404(AcademicSession.objects.select_for_update(), pk=pk)
     note = request.POST.get('note', '').strip()
     if len(note) < 20 or request.POST.get('confirm') != 'yes':
@@ -209,7 +209,7 @@ def templates_view(request):
         tdigest = hashlib.sha256(template_path(code).read_bytes()).hexdigest()
         rows.append({'stage': code, 'digest': tdigest, 'approved': TemplateApproval.objects.filter(stage=code, digest=tdigest).first()})
     if request.method == 'POST':
-        require(request.user, ['hod'])
+        require(request.user, ['coordinator'])
         stage, note = request.POST.get('stage'), request.POST.get('note', '').strip()
         match = next((x for x in rows if x['stage'] == stage), None)
         if not match or request.POST.get('digest') != match['digest'] or len(note) < 20 or request.POST.get('confirm') != 'yes':
