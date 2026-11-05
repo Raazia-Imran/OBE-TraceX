@@ -3,6 +3,12 @@
   document.querySelectorAll('[data-brand-replay]').forEach(button => button.addEventListener('click', () => {
     document.querySelectorAll('.brand-writing .written-brand').forEach(brand => { const copy = brand.cloneNode(true); brand.replaceWith(copy); });
   }));
+  const opening = document.querySelector('[data-opening-next]');
+  if (opening) {
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const timer = setTimeout(() => window.location.replace(opening.href), reduced ? 1500 : 4800);
+    window.addEventListener('pagehide', () => clearTimeout(timer), {once: true});
+  }
   const choicePanel = document.querySelector('.privacy-choice');
   const consentKey = 'obe-privacy-choice';
   const rememberKey = 'obe-intro-seen';

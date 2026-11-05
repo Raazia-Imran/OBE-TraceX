@@ -369,3 +369,16 @@ class ProfileExperienceTests(TestCase):
             self.user.profile.refresh_from_db();self.assertFalse(self.user.profile.avatar)
         protected=Client(enforce_csrf_checks=True);protected.force_login(self.user)
         self.assertEqual(protected.post('/account/profile/',{'first_name':'Forged'}).status_code,403)
+
+class OpeningSequenceTests(TestCase):
+    def test_anonymous_entry_starts_with_name_then_links_to_existing_story_and_login(self):
+        self.assertRedirects(self.client.get('/'),'/intro/')
+        opening=self.client.get('/intro/')
+        self.assertContains(opening,'written-brand')
+        self.assertContains(opening,'data-opening-next href="/about/"')
+        self.assertContains(opening,'Skip to sign in')
+        story=self.client.get('/about/')
+        self.assertContains(story,'One journey.')
+        self.assertContains(story,'Play the story')
+        self.assertContains(story,'Continue to sign in')
+        self.assertEqual(self.client.get('/login/').status_code,200)

@@ -338,3 +338,13 @@ def avatar(request):
     response = HttpResponse(bytes(image), content_type='image/jpeg')
     response['X-Content-Type-Options'] = 'nosniff'
     return response
+
+
+def entry(request):
+    if request.user.is_authenticated:
+        return dashboard(request)
+    return redirect('welcome')
+
+
+def welcome(request):
+    return render(request, 'evaluations/welcome.html')
