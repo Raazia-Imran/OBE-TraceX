@@ -1,5 +1,8 @@
 'use strict';
 (() => {
+  document.querySelectorAll('[data-brand-replay]').forEach(button => button.addEventListener('click', () => {
+    document.querySelectorAll('.brand-writing .written-brand').forEach(brand => { const copy = brand.cloneNode(true); brand.replaceWith(copy); });
+  }));
   const choicePanel = document.querySelector('.privacy-choice');
   const consentKey = 'obe-privacy-choice';
   const rememberKey = 'obe-intro-seen';
