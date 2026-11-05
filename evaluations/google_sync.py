@@ -46,7 +46,18 @@ def validated_tabs(result):
         if actual != name:
             raise ValueError('Google returned an unexpected worksheet order.')
         values = item.get('values', [])
-        if len(values) >= 10000:
-            raise ValueError('Source reached the 10,000 row boundary; narrow the academic session.')
+        if values:
+            headers = values[0]
+            identity = next((i for i, h in enumerate(headers) if str(h).strip() in ('Seat Number', 'Seat Number / Roll Number')), None)
+            if identity is None:
+                raise ValueError('Source worksheet has no student identity column.')
+            def occupied(row):
+                return len(row) > identity and row[identity] is not None and bool(str(row[identity]).strip())
+            if len(values) >= 10000 and occupied(values[-1]):
+                raise ValueError('Source reached the 10,000 row boundary; narrow the academic session.')
+            # Existing sheets extend formulas into rows with no student identity.
+            values = list(values)
+            while len(values) > 1 and not occupied(values[-1]):
+                values.pop()
         tabs[name] = values
     return tabs

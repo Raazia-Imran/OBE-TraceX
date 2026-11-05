@@ -299,3 +299,11 @@ class GoogleBridgeTests(TestCase):
         with patch('subprocess.run',side_effect=subprocess.CalledProcessError(1,'reader')),patch('pathlib.Path.read_text') as read:
             with self.assertRaises(ValueError):sync_google(None,None)
             read.assert_not_called()
+
+    def test_formula_only_tail_is_trimmed_but_boundary_student_is_rejected(self):
+        from .google_sync import validated_tabs
+        from .master_sync import READ_TABS
+        result=[{'range':f"'{name}'!A1:Z10000",'values':[['Seat Number','Total'],['SE21077',10]]+[['',0]]*9998} for name in READ_TABS]
+        self.assertTrue(all(len(rows)==2 for rows in validated_tabs(result).values()))
+        result[0]['values'][-1]=['SE21078',20]
+        with self.assertRaises(ValueError):validated_tabs(result)

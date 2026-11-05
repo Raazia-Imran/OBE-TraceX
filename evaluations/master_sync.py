@@ -32,7 +32,7 @@ def import_master(tabs, session, actor, source_digest):
     for group in groups:
         if FrozenResult.objects.filter(group=group,stage='FINAL',active=True).exists():
             summary['held'] += group.students.count()
-            summary['issues'].append(f'{group.project_id}: frozen records preserved. HOD must reopen before importing changes.')
+            summary['issues'].append(f'{group.project_id}: frozen records preserved. Coordinator must reopen before importing changes.')
             continue
         for student in group.students.all():
             matches = rows.get(student.seat, [])
@@ -69,7 +69,7 @@ def import_master(tabs, session, actor, source_digest):
                 approved=next((x for x in frozen.payload.get('students',[]) if x['seat']==student.seat),None)
                 incoming=stages.get(frozen.stage)
                 if approved and incoming and (approved['total']!=incoming['total'] or approved['criteria']!=incoming['criteria']):
-                    errors.append(f'{frozen.stage}: source changed after freezing; HOD reopening required.')
+                    errors.append(f'{frozen.stage}: source changed after freezing; Coordinator reopening required.')
             final=None
             try:
                 final=number(row.get('TOTAL (200)'))
