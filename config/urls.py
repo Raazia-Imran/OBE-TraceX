@@ -1,7 +1,11 @@
 from django.urls import path
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from evaluations import views
+from evaluations.access import access
+from evaluations.previews import preview
 urlpatterns = [
+ path('groups/<int:pk>/preview/<str:stage>/<str:extension>/', preview, name='preview_report'),
+ path('evaluators/', access, name='evaluator_access'),
  path('intro/', views.welcome, name='welcome'),
  path('about/', views.about, name='about'), path('privacy/', views.privacy, name='privacy'),
  path('account/profile/', views.profile, name='profile'), path('account/avatar/', views.avatar, name='avatar'),

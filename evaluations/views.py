@@ -75,11 +75,14 @@ def signout(request):
     return redirect('login')
 
 def context(request, **kwargs):
-    return {'portal_role': role(request.user), 'current_page': request.resolver_match.url_name, 'is_demo': AcademicSession.objects.filter(label__startswith='DEMO ONLY').exists(), **kwargs}
+    return {'portal_role': role(request.user), 'current_page': request.resolver_match.url_name, 'is_demo': False, **kwargs}
 
 @login_required
 def dashboard(request):
     groups = ProjectGroup.objects.select_related('session').prefetch_related('students').order_by('-session_id', 'project_id')
+    selected_session = request.GET.get('session','')
+    if selected_session.isdigit(): groups = groups.filter(session_id=selected_session)
+    elif selected_session != 'all': groups = groups.exclude(session__label__startswith='DEMO ONLY')
     search = request.GET.get('q', '').strip()[:100]
     if search: groups = groups.filter(project_id__icontains=search) | groups.filter(title__icontains=search)
     groups = list(groups)
@@ -88,10 +91,10 @@ def dashboard(request):
         group.final = FrozenResult.objects.filter(group=group, active=True, stage='FINAL').first()
         group.completion = round(group.frozen_count / 6 * 100)
         group.progress_class = f'progress-{group.frozen_count}'
-    return render(request, 'evaluations/dashboard.html', context(request, groups=groups, query=search,
-        student_count=Student.objects.count(), frozen_count=FrozenResult.objects.filter(active=True, stage__in=STAGES).count(),
+    return render(request, 'evaluations/dashboard.html', context(request, groups=groups, query=search, available_sessions=AcademicSession.objects.order_by('-id'), selected_session=selected_session,
+        student_count=sum(g.students.count() for g in groups), frozen_count=FrozenResult.objects.filter(group__in=groups, active=True, stage__in=STAGES).count(),
         correction_count=PendingChange.objects.filter(status='pending').count(),
-        final_count=FrozenResult.objects.filter(active=True, stage='FINAL').count(),
+        final_count=FrozenResult.objects.filter(group__in=groups, active=True, stage='FINAL').count(),
         recent=AuditEvent.objects.select_related('actor')[:5], latest_import=ImportBatch.objects.order_by('-id').first()))
 
 @login_required
@@ -103,6 +106,7 @@ def group_detail(request, pk):
         data = frozen.payload if frozen else stage_result(group, code)
         stages.append({'code': code, 'title': rubric['title'], 'maximum': sum(rubric['maxima']), 'data': data, 'frozen': frozen})
     return render(request, 'evaluations/group.html', context(request, group=group, stages=stages,
+        master_records=__import__('evaluations.models',fromlist=['MasterRecord']).MasterRecord.objects.filter(student__group=group).select_related('student'),
         final=FrozenResult.objects.filter(group=group, stage='FINAL', active=True).first(), report_stages=(*STAGES, 'D7')))
 
 @login_required
@@ -151,6 +155,10 @@ def sync(request):
     require(request.user, ['coordinator'])
     session = get_object_or_404(AcademicSession, pk=request.POST.get('session'))
     from .google_sync import sync_google
+    from .models import MasterRecord
+    if any(r.payload.get('source')=='faculty_reference_workbook' for r in MasterRecord.objects.filter(student__session=session)):
+        messages.error(request,'This session preserves the saved faculty workbook. Choose a separate live Google session to avoid mixing sources.')
+        return redirect('imports')
     try:
         summary = sync_google(session, request.user)
         messages.success(request, f"Google read complete: {summary['accepted']} accepted, {len(summary['issues'])} issues.")

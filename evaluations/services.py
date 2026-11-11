@@ -38,10 +38,13 @@ def receive_evaluation(payload, actor=None):
         student__group__attempt=payload.get('attempt', 1), evaluator=evaluator)
     if qs.count() != 1: raise ValueError('No unique roster assignment for this student, stage, evaluator and attempt.')
     assignment = qs.get()
+    if not assignment.active: raise ValueError('Evaluator access has been revoked.')
     data = {'criteria': criteria, 'comments': str(payload.get('comments', '')), 'source_id': source_id}
     content_hash = digest(data)
     with transaction.atomic():
         group = ProjectGroup.objects.select_for_update().get(pk=assignment.student.group_id)
+        assignment.refresh_from_db()
+        if not assignment.active: raise ValueError('Evaluator access has been revoked.')
         latest = assignment.revisions.order_by('-revision').first()
         if latest and latest.content_hash == content_hash: return 'unchanged'
         now = timezone.now()
@@ -95,7 +98,7 @@ def stage_result(group, stage):
     if len(members) != group.expected_members: errors.append('Roster does not match the expected group size.')
     if not 1 <= len(members) <= 4: errors.append('The supplied official templates support one to four members.')
     for student in members:
-        assignments = list(Assignment.objects.filter(student=student, stage=stage).order_by('evaluator'))
+        assignments = list(Assignment.objects.filter(student=student, stage=stage, active=True).order_by('evaluator'))
         values = []
         if not assignments: errors.append(f'{student.seat}: no authorized evaluator assignments.')
         for assignment in assignments:

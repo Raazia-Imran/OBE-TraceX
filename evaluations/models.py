@@ -35,6 +35,7 @@ class Student(models.Model):
         ordering = ['seat']
         constraints = [models.UniqueConstraint(fields=['session', 'seat', 'group'], name='unique_student_attempt')]
 class Assignment(models.Model):
+    active = models.BooleanField(default=True)
     student = models.ForeignKey(Student, on_delete=models.PROTECT)
     stage = models.CharField(max_length=2, choices=STAGE_CHOICES)
     evaluator = models.EmailField()
@@ -75,6 +76,11 @@ class PendingChange(models.Model):
     class Meta:
         constraints = [models.UniqueConstraint(fields=['assignment', 'digest'], name='unique_pending_change')]
 class AuditEvent(models.Model):
+    @property
+    def action_label(self):
+        labels={'evaluation.received':'Evaluation submitted','account.signed_in':'User signed in','account.signed_out':'User signed out','demo.created':'Demonstration data created','master.synced':'Master workbook read','stage.frozen':'Stage frozen','final.approved':'Final result approved','report.previewed':'Document preview downloaded','evaluator.authorized':'Evaluator authorized','evaluator.revoked':'Evaluator access revoked','faculty.reference_imported':'Faculty reference imported','rehearsal.prepared':'Rehearsal workspace prepared'}
+        return labels.get(self.action,self.action.replace('.',' ').replace('_',' ').capitalize())
+
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT)
     action = models.CharField(max_length=80)
     target = models.CharField(max_length=120)
@@ -117,3 +123,13 @@ class MasterRecord(models.Model):
     digest = models.CharField(max_length=64)
     errors = models.JSONField(default=list)
     synced_at = models.DateTimeField(auto_now=True)
+
+class StageForm(models.Model):
+    session = models.ForeignKey(AcademicSession, on_delete=models.PROTECT)
+    stage = models.CharField(max_length=2, choices=STAGE_CHOICES)
+    form_id = models.CharField(max_length=160, blank=True)
+    responder_url = models.URLField(max_length=500, blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    verification_note = models.TextField(blank=True)
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['session','stage'], name='unique_session_stage_form')]

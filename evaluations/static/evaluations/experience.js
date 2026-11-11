@@ -50,6 +50,9 @@
   const loader = document.querySelector('.work-loader');
   document.addEventListener('submit', event => {
     if (event.defaultPrevented || !loader || event.target.method.toLowerCase() !== 'post') return;
+    // Downloads keep this page open, so pageshow will not clear an overlay.
+    const action = new URL(event.target.action, window.location.href).pathname;
+    if (/\/(preview|export|sample)\//.test(action)) return;
     loader.hidden = false;
     event.target.setAttribute('aria-busy', 'true');
   });
