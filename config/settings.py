@@ -33,7 +33,7 @@ elif PRODUCTION:
     raise ImproperlyConfigured('Production requires PostgreSQL; local SQLite is for development only.')
 else:
     DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3',
-                 'NAME': os.getenv('OBE_DB_PATH', str(BASE_DIR / 'local.sqlite3')), 'OPTIONS': {'timeout': 20}}}
+                 'NAME': os.getenv('OBE_DB_PATH', str(BASE_DIR / 'private-data' / 'real.sqlite3') if (BASE_DIR / 'private-data' / 'real.sqlite3').exists() else str(BASE_DIR / 'local.sqlite3')), 'OPTIONS': {'timeout': 20}}}
 PASSWORD_HASHERS = ['django.contrib.auth.hashers.Argon2PasswordHasher', 'django.contrib.auth.hashers.PBKDF2PasswordHasher']
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -77,3 +77,5 @@ SOFFICE_PATH = os.getenv('SOFFICE_PATH', 'soffice')
 LOGGING = {'version': 1, 'disable_existing_loggers': False,
            'handlers': {'console': {'class': 'logging.StreamHandler'}},
            'root': {'handlers': ['console'], 'level': 'WARNING'}}
+
+OBE_DEFAULT_SESSION_ID = os.getenv('OBE_DEFAULT_SESSION_ID', '')

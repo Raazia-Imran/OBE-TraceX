@@ -78,7 +78,7 @@ def comparison(request):
     refs=MasterRecord.objects.filter(payload__source='faculty_reference_workbook').select_related('student__group').order_by('student__seat')
     available=AcademicSession.objects.filter(student__masterrecord__isnull=False).exclude(pk__in=refs.values_list('student__session_id',flat=True)).exclude(course_code='REHEARSAL').distinct().order_by('-pk')
     selected=request.GET.get('session','')
-    live=available.filter(pk=selected).first() if selected.isdigit() else available.filter(label__startswith='Live Google').first()
+    live=available.filter(pk=selected).first() if selected.isdigit() else available.first()
     rows=[]
     for ref in refs:
         candidate=MasterRecord.objects.filter(student__seat=ref.student.seat,student__session=live).first() if live else None

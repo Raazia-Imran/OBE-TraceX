@@ -80,7 +80,7 @@ def context(request, **kwargs):
 @login_required
 def dashboard(request):
     groups = ProjectGroup.objects.select_related('session').prefetch_related('students').order_by('-session_id', 'project_id')
-    selected_session = request.GET.get('session','')
+    selected_session = request.GET.get('session', settings.OBE_DEFAULT_SESSION_ID)
     if selected_session.isdigit(): groups = groups.filter(session_id=selected_session)
     elif selected_session != 'all': groups = groups.exclude(session__label__startswith='DEMO ONLY')
     search = request.GET.get('q', '').strip()[:100]

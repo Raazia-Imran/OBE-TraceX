@@ -12,6 +12,6 @@ if not defined OBE_SYNC_COORDINATOR (
  pause
  exit /b 1
 )
-if not defined OBE_DB_PATH if exist "private-data\expo.sqlite3" set "OBE_DB_PATH=%~dp0private-data\expo.sqlite3"
+if not defined OBE_DB_PATH if exist "private-data\real.sqlite3" set "OBE_DB_PATH=%~dp0private-data\real.sqlite3"
 .venv\Scripts\python.exe manage.py watch_master --session %OBE_LIVE_SESSION_ID% --coordinator %OBE_SYNC_COORDINATOR% --interval 60
 pause
