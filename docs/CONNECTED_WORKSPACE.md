@@ -15,7 +15,7 @@ integrations/n8n/archive_report.js is an additive branch contract to attach afte
 The receiver passed an isolated n8n acceptance test using the existing D1 HTML template and a live source row. The archived HTML was verified byte-for-byte. No email was sent and no original grading workflow was changed. The branch still needs connection to each canonical live stage workflow after Form/source mapping is confirmed.
 
 ## Required external inputs
-Six canonical D1-D6 Form editor IDs/respondent links, corresponding response destinations, and owner-authorized Google permissions are still needed. User must supply these links because they were not retrievable from previous chats.
+All six supplied editor/respondent pairs are saved privately in the local live session. D1 was title-checked; D2-D6 are mapped in the supplied order pending owner sign-in verification. Linked response-sheet destinations and owner-authorized Google permissions still need confirmation. Full historical replay is deferred until after the mid evaluation.
 Google permissions need a private authorized-user token with Drive and Forms access. The evaluator page refuses public/domain/group responder access rather than presenting it as a verified allowlist.
 No new Google authorization or official template approval has been fabricated.
 
@@ -28,3 +28,5 @@ The supplied three-group input must still be replayed through isolated copies of
 ## Server handover
 Use PostgreSQL and the existing production security configuration. Run migrations 0005 and 0006. Run one managed background worker per live source session (systemd/container scheduler), monitor its status, retain database/document backups and configure HTTPS, server secrets and Google OAuth for the university identity.
 The current desktop configuration is a local evaluation environment, not a completed university-server deployment.
+
+Coordinator-only Form editor buttons are available in Evaluator access and Integration hub. HOD users see respondent links and saved data without editor buttons. Form URLs and private configuration are not committed to the public repository.
