@@ -133,3 +133,23 @@ class StageForm(models.Model):
     verification_note = models.TextField(blank=True)
     class Meta:
         constraints = [models.UniqueConstraint(fields=['session','stage'], name='unique_session_stage_form')]
+
+class StoredDocument(models.Model):
+    group = models.ForeignKey(ProjectGroup,on_delete=models.PROTECT)
+    student = models.ForeignKey(Student,on_delete=models.PROTECT,null=True,blank=True)
+    stage = models.CharField(max_length=2)
+    kind = models.CharField(max_length=20)
+    name = models.CharField(max_length=200)
+    mime = models.CharField(max_length=100)
+    content = models.BinaryField()
+    digest = models.CharField(max_length=64)
+    source_id = models.CharField(max_length=200,unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta: ordering=['-id']
+class SyncState(models.Model):
+    session = models.OneToOneField(AcademicSession,on_delete=models.PROTECT)
+    attempted_at = models.DateTimeField(null=True)
+    succeeded_at = models.DateTimeField(null=True)
+    error = models.CharField(max_length=250,blank=True)
+    summary = models.JSONField(default=dict)
+    running_until = models.DateTimeField(null=True)

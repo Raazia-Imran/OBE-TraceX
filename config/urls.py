@@ -3,7 +3,15 @@ from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from evaluations import views
 from evaluations.access import access
 from evaluations.previews import preview
+from evaluations import archive
 urlpatterns = [
+ path('workbook/', archive.workbook, name='workbook'),
+ path('comparison/', archive.comparison, name='comparison'),
+ path('workspace/state/', archive.workspace_state, name='workspace_state'),
+ path('connections/', archive.source_hub, name='source_hub'),
+ path('documents/', archive.documents, name='documents'),
+ path('documents/<int:pk>/download/', archive.download, name='document_download'),
+ path('integrations/n8n/report/', archive.ingest_report, name='ingest_report'),
  path('groups/<int:pk>/preview/<str:stage>/<str:extension>/', preview, name='preview_report'),
  path('evaluators/', access, name='evaluator_access'),
  path('intro/', views.welcome, name='welcome'),

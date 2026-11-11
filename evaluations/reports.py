@@ -127,5 +127,7 @@ def export_report(group, stage, extension, actor):
             raise ValueError('The template changed while the report was generated. Verify it again.')
         report = Report.objects.create(result=final, stage=stage, template_digest=tdigest,
             file_digest=hashlib.sha256(content).hexdigest(), format=extension, created_by=actor)
+        from .archive import save_document
+        save_document(group,stage,'qec',f'{group.project_id}_{stage}_v{final.version}.{extension}',content,extension,'qec:'+str(report.pk))
         audit(actor, 'report.exported', report.pk, {'stage': stage, 'final_version': final.version, 'format': extension})
     return content, f'{group.project_id}_{stage}_v{final.version}.{extension}'
