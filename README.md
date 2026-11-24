@@ -1,10 +1,12 @@
 # OBE-TraceX
 
+[Start with the current handover](docs/handover/00_START_HERE.md) · [Live integration runbook](docs/handover/03_LIVE_INTEGRATION.md) · [Team setup](docs/handover/02_SETUP_AND_OPERATIONS.md)
+
 **Automated Outcome-Based Education Evaluation & Grading Portal**
 
 OBE-TraceX means Outcome-Based Education Tracking, Analysis, and Execution. This portal extends the existing Google Forms → Google Sheets → n8n assessment system for NED University's Department of Software Engineering.
 
-**Current release: tested local pilot.** It includes Coordinator/HOD workspaces, assigned-evaluator validation, correction review, immutable approved snapshots, final approval, original-template Word/PDF generation, source imports and a signed integration endpoint. University deployment, live credential binding and faculty acceptance are still required.
+**Current status: local pilot; live end-to-end acceptance is pending.** It includes Coordinator/HOD workspaces, assigned-evaluator validation, correction review, immutable approved snapshots, final approval, original-template Word/PDF generation, source imports and a signed integration endpoint. University deployment, live credential binding and faculty acceptance are still required.
 
 ## Corrected master-workbook flow
 
@@ -130,15 +132,15 @@ For troubleshooting, updating an existing clone, the optional demo walkthrough, 
 1. Create an academic session and import its official group roster.
 2. Read the existing master workbook through XLSX upload or the configured read-only Google connection.
 3. Review source reconciliation issues. No evaluator re-entry is required for this route.
-4. Coordinator freezes reviewed stages; HOD approves the final result and exact template versions.
+4. Coordinator freezes reviewed stages, approves the final result and verifies exact template versions. HOD reviews and downloads.
 5. Download D1–D7 group records. For a controlled historical test and optional continuous reads, follow the real-group guide above.
 
 ## Verify
 
 ```powershell
-.\\venv\\Scripts\\python.exe manage.py test evaluations
-.\\venv\\Scripts\\python.exe manage.py check
-.\\venv\\Scripts\\python.exe manage.py template_sample --output .\\private-samples
+.\\.venv\\Scripts\\python.exe manage.py test evaluations
+.\\.venv\\Scripts\\python.exe manage.py check
+.\\.venv\\Scripts\\python.exe manage.py template_sample --output .\\private-samples
 ```
 
 `template_sample` generates clearly named synthetic verification files and does not change the original templates. Review them in Word and the target server's PDF renderer. Production must run PostgreSQL integration tests and a backup/restore drill in addition to these checks.

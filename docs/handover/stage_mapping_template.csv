@@ -1,0 +1,8 @@
+stage,assessment,form_editor_id,respondent_url,workbook_id,response_tab,criterion_tab,workflow_name,owner,destination_verified_at,allowlist_verified_at,decision_reference
+D1,Proposal defense,,,,D1_Proposal,D1_Averaged_QEC,Workflow 1 - Proposal Defense,,,,
+D2,Semester 1 progress,,,,D2_S1_Progress,Supervisor raw details,Workflow 2 - Semester 1 Progress,,,,
+D3,Semester 1 evaluation,,,,D3_S1_Eval,D3_Averaged_QEC,Workflow 3,,,,
+D4,Semester 2 progress,,,,D4_S2_Progress,Supervisor raw details,Workflow 4 - Semester 2 Progress,,,,
+D5,Final report,,,,D5_Final_Report,D5_Averaged_QEC,Workflow 5 - Final Report,,,,
+D6,Final evaluation,,,,D6_Final_Eval,D6_Averaged_QEC,Workflow 6 - Final Eval,,,,
+D7,Consolidation,,,, D7_CONSOLIDATED_GRADING,,Workflow 7 - Final Grading,,,,

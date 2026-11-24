@@ -98,7 +98,7 @@ def import_master(tabs, session, actor, source_digest):
 
 def master_stage_result(group, stage):
     errors=[]; students=[]
-    if not group.session.rules_approved:errors.append('HOD must approve the source-workbook and reporting policy.')
+    if not group.session.rules_approved:errors.append('Coordinator must approve the source-workbook and reporting policy.')
     if group.students.count()!=group.expected_members:errors.append('Registered group membership is incomplete.')
     for student in group.students.all():
         record=MasterRecord.objects.filter(student=student).first()

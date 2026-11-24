@@ -93,9 +93,8 @@ def dashboard(request):
         group.progress_class = f'progress-{group.frozen_count}'
     return render(request, 'evaluations/dashboard.html', context(request, groups=groups, query=search, available_sessions=AcademicSession.objects.order_by('-id'), selected_session=selected_session,
         student_count=sum(g.students.count() for g in groups), frozen_count=FrozenResult.objects.filter(group__in=groups, active=True, stage__in=STAGES).count(),
-        correction_count=PendingChange.objects.filter(status='pending').count(),
-        final_count=FrozenResult.objects.filter(group__in=groups, active=True, stage='FINAL').count(),
-        recent=AuditEvent.objects.select_related('actor')[:5], latest_import=ImportBatch.objects.order_by('-id').first()))
+        correction_count=PendingChange.objects.filter(assignment__student__group__in=groups, status='pending').count(),
+        final_count=FrozenResult.objects.filter(group__in=groups, active=True, stage='FINAL').count()))
 
 @login_required
 def group_detail(request, pk):

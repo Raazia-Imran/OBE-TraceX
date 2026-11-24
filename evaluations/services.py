@@ -76,7 +76,7 @@ def resolve_change(change_id, actor, approve, note):
     if change.status != 'pending': raise ValueError('This correction has already been reviewed.')
     if approve:
         if FrozenResult.objects.filter(group=group, stage__in=[change.assignment.stage, 'FINAL'], active=True).exists():
-            raise ValueError('Ask the HOD to reopen this stage before accepting a correction.')
+            raise ValueError('Ask the Coordinator to reopen this stage before accepting a correction.')
         last = change.assignment.revisions.order_by('-revision').first()
         Evaluation.objects.create(assignment=change.assignment, revision=last.revision + 1 if last else 1,
                                   content_hash=change.digest, **change.payload)
