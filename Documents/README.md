@@ -4,7 +4,7 @@
 
 - [Complete handover PDF](OBE_TraceX_Complete_Handover.pdf)
 - [Editable handover Word file](OBE_TraceX_Complete_Handover.docx)
-- [Current technical handover and AI continuation prompt](../docs/handover/00_START_HERE.md)
+- [Technical handover and AI continuation prompt](../docs/handover/00_START_HERE.md)
 - [Live integration runbook](../docs/handover/03_LIVE_INTEGRATION.md)
 - [Setup and operations](../docs/handover/02_SETUP_AND_OPERATIONS.md)
 - [Stage mapping template](../docs/handover/stage_mapping_template.csv)
