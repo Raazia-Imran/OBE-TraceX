@@ -66,6 +66,13 @@ def populate(stage, payload):
             # rather than appending beyond it and pushing the project title off the page.
             replace_text(paragraph, 'Project Title:', 'Project Title: ' + payload['project_title'])
     table = document.tables[0]
+    maxima = students[0].get("criterion_maxima") if stage == "D4" else None
+    if maxima:
+        for cell, maximum in zip(table.rows[0].cells[3:8], maxima):
+            for paragraph in cell.paragraphs:
+                for old in ("(16)", "(8)"):
+                    if old in paragraph.text:
+                        replace_text(paragraph, old, f"({maximum})")
     for index, student in enumerate(students):
         cells = table.rows[index + 2].cells
         values = [str(index + 1), student['name'], student['seat']]

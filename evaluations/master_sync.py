@@ -48,6 +48,7 @@ def import_master(tabs, session, actor, source_digest):
                 try:
                     total=number(row.get(header))
                     if not 0<=total<=sum(RUBRICS[stage]['maxima']): raise ValueError('Stage total outside its allowed range.')
+                    maxima = RUBRICS[stage]["maxima"]
                     criteria=[]
                     if stage in AVERAGED:
                         found=details[stage].get(student.seat,[])
@@ -58,12 +59,19 @@ def import_master(tabs, session, actor, source_digest):
                         found=raw[stage].get(student.seat,[])
                         if len(found)!=1: raise ValueError('Supervisor criterion detail is missing or repeated; resolve the source before official export.')
                         columns=criterion_columns(stage,list(found[0]))
-                        criteria=weighted(stage,[percentage(found[0].get(h)) for h in columns])
+                        percentages = [percentage(found[0].get(h)) for h in columns]
+                        criteria = weighted(stage, percentages)
+                        if stage == "D4":
+                            # D7 averages the five response percentages and multiplies by 0.48.
+                            maxima = [Decimal("9.6")] * 5
+                            criteria = [pct * maximum / 100 for pct, maximum in zip(percentages, maxima)]
                     if len(criteria)!=len(RUBRICS[stage]['maxima']): raise ValueError('Criterion columns are incomplete.')
-                    if any(not 0<=v<=m for v,m in zip(criteria,RUBRICS[stage]['maxima'])): raise ValueError('Criterion mark outside its maximum.')
+                    if any(not 0<=v<=m for v,m in zip(criteria,maxima)): raise ValueError('Criterion mark outside its maximum.')
                     if abs(sum(criteria)-total)>Decimal('.005'):
                         raise ValueError(f'Master total {total} disagrees with criterion detail {sum(criteria)}. Source unchanged; faculty reconciliation required.')
                     stages[stage]={'criteria':[str(x) for x in criteria],'total':str(total),'display_total':display(total)}
+                    if stage == "D4":
+                        stages[stage]["criterion_maxima"] = [str(v) for v in maxima]
                 except ValueError as error: errors.append(f'{stage}: {error}')
             for frozen in FrozenResult.objects.filter(group=group,active=True):
                 approved=next((x for x in frozen.payload.get('students',[]) if x['seat']==student.seat),None)
